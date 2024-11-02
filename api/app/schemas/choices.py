@@ -1,25 +1,60 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 from typing import Optional, List, AnyStr
-from app.schemas.enums import *
+from app.schemas.base import Base
+from app.schemas.ticks import TicksSchema
 
 
-class Base(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class ExtraToResponse(Base):
+    limit: int
+    offset: int
+    total: int
 
 
 class Choice(Base):
-    id: AnyStr
-    sex: Optional[Sex] = Field(default=None, example=Sex.woman)
-    days: Optional[Days] = Field(default=None, example=Days.three_days)
-    destination: Optional[Destination] = Field(default=None, example=Destination.abroad)
-    weather: Optional[Weather] = Field(default=None, example=Weather.cold)
-    trip_type: Optional[Trip] = Field(default=None, example=Trip.skies)
+    sex: Optional[str] = Field(default=None, example="female")
+    days: Optional[int] = Field(default=None, example="3")
+    destination: Optional[str] = Field(default=None, example="internanional")
+    weather: Optional[str] = Field(default=None, example="warm")
+    trip_type: Optional[str] = Field(default=None, example="buisness")
 
 
-class App_request(Base):
+class AppAndChListRequest(Base):
     name: Optional[str] = Field(default=None, example="Название приложения")
     description: Optional[str] = Field(default=None, example="Описание")
 
 
-class App_response(App_request):
+class AppResponse(Base):
     id: Optional[str] = Field(default=None)
+    name: Optional[str] = Field(default=None, example="Название приложения")
+    description: Optional[str] = Field(default=None, example="Описание")
+
+
+class ClothesResponseForChecList(Base):
+    id: int
+    name: str
+    is_checked: bool = Field(default=False)
+
+
+class ClothesCategoryShema(Base):
+    id: int
+    name: str
+    clothes: List[ClothesResponseForChecList]
+
+
+class ItemCheckListSchema(Base):
+    id: AnyStr
+    name: Optional[str] = Field(default="Название списка вещей")
+    description: Optional[str] = Field(default="Описание")
+    steps: List[Choice] = Field(default=None)
+
+
+class CheckListByIdtResponse(ItemCheckListSchema):
+    cl_list: List[ClothesCategoryShema] = Field(default=None)
+
+
+class ChListResponse(ExtraToResponse):
+    data: List[ItemCheckListSchema]
+
+
+class AppResponseExtended(AppResponse):
+    items_check_list: List[ItemCheckListSchema] = Field(default=None)
